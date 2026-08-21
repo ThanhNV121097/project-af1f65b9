@@ -57,7 +57,9 @@ func healthz(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
 		defer cancel()
-		if err := db.PingContext(ctx); err != nil {
+
+		var ok int
+		if err := db.QueryRowContext(ctx, `select 1`).Scan(&ok); err != nil {
 			writeError(w, http.StatusServiceUnavailable, "service_unavailable", "Service is unavailable.")
 			return
 		}
@@ -66,6 +68,7 @@ func healthz(db *sql.DB) http.HandlerFunc {
 		_, _ = w.Write([]byte("ok"))
 	}
 }
+
 
 func greeting(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
