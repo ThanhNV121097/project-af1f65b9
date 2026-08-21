@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-bg: #ffffff;
+  --color-surface: #ffffff;
+  --color-border: #000000;
+  --color-text: #000000;
+  --color-text-muted: #666666;
+  --color-focus: #000000;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --font-body: Arial, Helvetica, sans-serif;
+  --font-heading: Arial, Helvetica, sans-serif;
+  --text-base: 16px;
+  --text-sm: 14px;
+  --text-hero: clamp(2.75rem, 8vw, 5rem);
+  --line-base: 1.4;
+  --line-hero: 1;
+  --weight-regular: 400;
+  --border-width: 1px;
+  --focus-width: 2px;
+  --radius-none: 0;
+  --shadow-none: none;
+  --duration-none: 0ms;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--line-base);
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+:focus-visible {
+  outline: var(--focus-width) solid var(--color-focus);
+  outline-offset: var(--focus-width);
+}
+
+.app-shell {
+  min-height: 100vh;
+  background: var(--color-bg);
+}
