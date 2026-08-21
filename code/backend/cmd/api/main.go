@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"log"
 	"net/http"
@@ -37,6 +38,7 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", healthz(db))
+	mux.HandleFunc("GET /v1/greeting", greeting(db))
 
 	server := &http.Server{
 		Addr:              ":" + listenPort(),
@@ -62,6 +64,33 @@ func healthz(db *sql.DB) http.HandlerFunc {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte("ok\n"))
 	}
+}
+
+func greeting(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
+		defer cancel()
+
+		var text string
+		switch err := db.QueryRowContext(ctx, `select text from greetings where id = 1`).Scan(&text); {
+		case errors.Is(err, sql.ErrNoRows):
+			writeError(w, http.StatusNotFound, "greeting_not_found", "Greeting is not available.")
+		case err != nil:
+			log.Printf("load greeting: %v", err)
+			writeError(w, http.StatusInternalServerError, "internal_error", "Greeting could not be loaded.")
+		case text == "":
+			writeError(w, http.StatusUnprocessableEntity, "greeting_empty", "Greeting is empty.")
+		default:
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(map[string]string{"text": text})
+		}
+	}
+}
+
+func writeError(w http.ResponseWriter, status int, code string, message string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	_ = json.NewEncoder(w).Encode(map[string]any{"error": map[string]string{"code": code, "message": message}})
 }
 
 func listenPort() string {
