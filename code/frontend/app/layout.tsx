@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import GreetingScreen from "../components/GreetingScreen";
 
 export const metadata: Metadata = {
   title: "hello-word-2",
