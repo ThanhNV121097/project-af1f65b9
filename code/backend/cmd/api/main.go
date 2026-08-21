@@ -41,6 +41,9 @@ func main() {
 	mux.HandleFunc("GET /greeting", greeting(db))
 	mux.HandleFunc("GET /api/greeting", greeting(db))
 	mux.HandleFunc("GET /api/greeting/", greeting(db))
+	mux.HandleFunc("GET /greeting", greeting(db))
+	mux.HandleFunc("GET /api/greeting", greeting(db))
+	mux.HandleFunc("GET /api/greeting/", greeting(db))
 
 	server := &http.Server{
 		Addr:              ":" + listenPort(),
