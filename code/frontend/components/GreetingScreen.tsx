@@ -16,7 +16,7 @@ export default function GreetingScreen() {
   useEffect(() => {
     const controller = new AbortController();
 
-    fetch(`${apiBase}/v1/greeting`, { signal: controller.signal })
+    fetch(`${apiBase}/greeting`, { signal: controller.signal })
       .then(async (response) => {
         if (!response.ok) {
           if (response.status === 422) {
