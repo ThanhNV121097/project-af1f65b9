@@ -57,7 +57,7 @@ func healthz(db *sql.DB) http.HandlerFunc {
 		ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
 		defer cancel()
 		if err := db.PingContext(ctx); err != nil {
-			http.Error(w, "service unavailable", http.StatusServiceUnavailable)
+			writeError(w, http.StatusServiceUnavailable, "service_unavailable", "Service is unavailable.")
 			return
 		}
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
