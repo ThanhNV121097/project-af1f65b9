@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>hello-word-2</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #ffffff;
+      --text: #000000;
+      --muted: #666666;
+      --focus: #000000;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 16px/1.4 Arial, Helvetica, sans-serif;
+    }
+    .frame {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+    .hero {
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 32px;
+    }
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(2.75rem, 8vw, 5rem);
+      line-height: 1;
+      font-weight: 400;
+      letter-spacing: -0.04em;
+    }
+    .hero p {
+      margin: 12px 0 0;
+      color: var(--muted);
+      max-width: 42ch;
+    }
+    .controls {
+      border-top: 1px solid var(--line);
+      padding: 16px;
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+      background: #fff;
+    }
+    button {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      padding: 10px 14px;
+      font: inherit;
+      cursor: pointer;
+    }
+    button[aria-pressed="true"] {
+      border-color: var(--text);
+      background: var(--text);
+      color: #fff;
+    }
+    button:focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: 2px;
+    }
+    .status {
+      padding: 0 16px 16px;
+      color: var(--muted);
+      font-size: 14px;
+      text-align: center;
+      background: #fff;
+    }
+    .state-loading .hero h1 { letter-spacing: 0; }
+    .state-error .hero h1 { text-decoration: underline; text-decoration-thickness: 2px; }
+  </style>
+</head>
+<body>
+  <main class="frame">
+    <section class="state-ready" aria-label="Greeting preview" id="card">
+      <div class="hero" aria-live="polite">
+        <div>
+          <h1 id="greeting">Hello Word</h1>
+          <p>Single stored value, pulled from API, rendered centered on plain white screen.</p>
+        </div>
+      </div>
+      <div class="controls" aria-label="Preview states">
+        <button type="button" aria-pressed="true" data-state="ready">Loaded</button>
+        <button type="button" aria-pressed="false" data-state="loading">Loading</button>
+        <button type="button" aria-pressed="false" data-state="error">Error</button>
+      </div>
+      <div class="status" id="status">API returns stored row from PostgreSQL.</div>
+    </section>
+  </main>
+  <script>
+    const card = document.getElementById('card');
+    const greeting = document.getElementById('greeting');
+    const status = document.getElementById('status');
+    const buttons = [...document.querySelectorAll('[data-state]')];
+    const states = {
+      ready: { cls: 'state-ready', text: 'Hello Word', status: 'API returns stored row from PostgreSQL.' },
+      loading: { cls: 'state-loading', text: 'Hello Word', status: 'Loading greeting from backend API…' },
+      error: { cls: 'state-error', text: 'Hello Word', status: 'API error. Retry after backend responds.' }
+    };
+    function setState(name) {
+      const s = states[name];
+      card.className = s.cls;
+      greeting.textContent = s.text;
+      status.textContent = s.status;
+      buttons.forEach(btn => btn.setAttribute('aria-pressed', String(btn.dataset.state === name)));
+    }
+    buttons.forEach(btn => btn.addEventListener('click', () => setState(btn.dataset.state)));
+  </script>
+</body>
+</html>
