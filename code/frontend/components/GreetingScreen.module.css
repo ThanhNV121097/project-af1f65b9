@@ -1,0 +1,31 @@
+.frame {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: var(--space-6);
+  background: var(--color-bg);
+}
+
+.screen {
+  display: grid;
+  place-items: center;
+  text-align: center;
+  gap: var(--space-4);
+  max-width: 100%;
+}
+
+.greeting {
+  margin: 0;
+  color: var(--color-text);
+  font-family: var(--font-heading);
+  font-size: var(--text-hero);
+  font-weight: var(--weight-regular);
+  line-height: var(--line-hero);
+}
+
+.message {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: var(--line-base);
+}
