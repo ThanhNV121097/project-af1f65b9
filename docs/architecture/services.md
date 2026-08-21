@@ -1,5 +1,9 @@
 # Services — hello-word-2
 
+> Paths here are the routes the backend mounts, written WITHOUT the `/api` prefix.
+> The deploy proxy strips that prefix before the request reaches the service, so a
+> contract written with it describes a route that answers 404 in production.
+
 ## API conventions
 
 Base path: backend service root.
@@ -48,7 +52,7 @@ Failure:
 |---|---|---|---|
 | `503` | `service_unavailable` | `Service is unavailable.` | Migrations not applied or database `SELECT 1` fails |
 
-### `GET /api/greeting`
+### `GET /greeting`
 
 Purpose: return stored greeting for home page.
 
@@ -86,12 +90,12 @@ Frontend behavior tied to this contract:
 
 Forward:
 
-1. Add `greetings` table and seed row through SQL migration before enabling `GET /api/greeting`.
+1. Add `greetings` table and seed row through SQL migration before enabling `GET /greeting`.
 2. Backend reads `select text from greetings where id = 1` and returns `{ "text": value }`.
 
 Backward:
 
-1. Remove `GET /api/greeting` implementation with backend rollback.
+1. Remove `GET /greeting` implementation with backend rollback.
 2. Run down migration only in disposable/local environments; production rollback restores database backup.
 
 Safety on populated tables:
