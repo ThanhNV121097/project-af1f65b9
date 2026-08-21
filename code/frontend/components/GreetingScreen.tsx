@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import styles from "./GreetingScreen.module.css";
-import type { GreetingResponse, GreetingState } from "../lib/mock/show-stored-greeting";
 
+type GreetingResponse = { text: string };
+type GreetingState = "ready" | "loading" | "error" | "empty";
 type ViewState = Exclude<GreetingState, "ready"> | "ready";
 
 const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "/api";
