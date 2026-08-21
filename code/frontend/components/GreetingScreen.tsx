@@ -2,33 +2,46 @@
 
 import { useEffect, useState } from "react";
 import styles from "./GreetingScreen.module.css";
-import { greetingResponse, type GreetingState } from "../lib/mock/show-stored-greeting";
+import type { GreetingResponse, GreetingState } from "../lib/mock/show-stored-greeting";
 
 type ViewState = Exclude<GreetingState, "ready"> | "ready";
+
+const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "/api";
 
 export default function GreetingScreen() {
   const [state, setState] = useState<ViewState>("loading");
   const [text, setText] = useState("");
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const forced = params.get("state") as ViewState | null;
-    const nextState = forced ?? "ready";
+    const controller = new AbortController();
 
-    const timer = window.setTimeout(() => {
-      if (nextState === "error") {
-        setState("error");
-        return;
-      }
-      if (nextState === "empty") {
-        setState("empty");
-        return;
-      }
-      setText(greetingResponse.text);
-      setState("ready");
-    }, 250);
+    fetch(`${apiBase}/v1/greeting`, { signal: controller.signal })
+      .then(async (response) => {
+        if (!response.ok) {
+          if (response.status === 422) {
+            setState("empty");
+            return;
+          }
+          setState("error");
+          return;
+        }
 
-    return () => window.clearTimeout(timer);
+        const data = (await response.json()) as GreetingResponse;
+        if (data.text === "") {
+          setState("empty");
+          return;
+        }
+
+        setText(data.text);
+        setState("ready");
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) {
+          setState("error");
+        }
+      });
+
+    return () => controller.abort();
   }, []);
 
   return (
