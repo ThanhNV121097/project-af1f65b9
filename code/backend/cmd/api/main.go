@@ -53,8 +53,12 @@ func main() {
 	}
 }
 
+type rowScanner interface {
+	Scan(...any) error
+}
+
 type rowQuerier interface {
-	QueryRowContext(context.Context, string, ...any) *sql.Row
+	QueryRowContext(context.Context, string, ...any) rowScanner
 }
 
 func healthz(db rowQuerier) http.HandlerFunc {
