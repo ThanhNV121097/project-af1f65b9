@@ -57,8 +57,10 @@ type rowScanner interface {
 	Scan(...any) error
 }
 
-type rowQuerier interface {
-	QueryRowContext(context.Context, string, ...any) rowScanner
+type dbQuerier struct{ db *sql.DB }
+
+func (d dbQuerier) QueryRowContext(ctx context.Context, query string, args ...any) rowScanner {
+	return d.db.QueryRowContext(ctx, query, args...)
 }
 
 func healthz(db rowQuerier) http.HandlerFunc {
