@@ -12,7 +12,17 @@ import (
 
 type fakeRow struct{ err error }
 
-func (r fakeRow) Scan(...any) error { return r.err }
+func (r fakeRow) Scan(dest ...any) error {
+	if r.err != nil {
+		return r.err
+	}
+	if len(dest) > 0 {
+		if s, ok := dest[0].(*string); ok {
+			*s = ""
+		}
+	}
+	return nil
+}
 
 type fakeDB struct{ row fakeRow }
 
