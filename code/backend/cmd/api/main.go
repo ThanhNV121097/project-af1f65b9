@@ -80,7 +80,7 @@ func healthz(db rowQuerier) http.HandlerFunc {
 }
 
 
-func greeting(db *sql.DB) http.HandlerFunc {
+func greeting(db rowQuerier) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
 		defer cancel()
