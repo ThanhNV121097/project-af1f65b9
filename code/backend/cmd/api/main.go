@@ -39,6 +39,7 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", healthz(db))
 	mux.HandleFunc("GET /greeting", greeting(db))
+	mux.HandleFunc("GET /api/greeting", greeting(db))
 
 	server := &http.Server{
 		Addr:              ":" + listenPort(),
