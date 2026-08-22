@@ -26,6 +26,7 @@ func main() {
 		log.Fatalf("open database: %v", err)
 	}
 	defer db.Close()
+	wrappedDB := dbQuerier{db: db}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -37,9 +38,9 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /healthz", healthz(db))
-	mux.HandleFunc("GET /greeting", greeting(db))
-	mux.HandleFunc("GET /api/greeting", greeting(db))
+	mux.HandleFunc("GET /healthz", healthz(wrappedDB))
+	mux.HandleFunc("GET /greeting", greeting(wrappedDB))
+	mux.HandleFunc("GET /api/greeting", greeting(wrappedDB))
 
 	server := &http.Server{
 		Addr:              ":" + listenPort(),
