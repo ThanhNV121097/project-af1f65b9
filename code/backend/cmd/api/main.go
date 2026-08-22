@@ -57,6 +57,12 @@ func healthz(db *sql.DB) http.HandlerFunc {
 		ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
 		defer cancel()
 
+		var applied int
+		if err := db.QueryRowContext(ctx, `select count(*) from schema_migrations`).Scan(&applied); err != nil || applied == 0 {
+			writeError(w, http.StatusServiceUnavailable, "service_unavailable", "Service is unavailable.")
+			return
+		}
+
 		var ok int
 		if err := db.QueryRowContext(ctx, `select 1`).Scan(&ok); err != nil {
 			writeError(w, http.StatusServiceUnavailable, "service_unavailable", "Service is unavailable.")
