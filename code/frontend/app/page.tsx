@@ -1,3 +1,5 @@
+import GreetingScreen from "../components/GreetingScreen";
+
 export default function Home() {
-  return <main className="app-shell" />;
+  return <GreetingScreen />;
 }
