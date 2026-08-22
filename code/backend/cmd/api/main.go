@@ -89,8 +89,11 @@ func greeting(db rowQuerier) http.HandlerFunc {
 		ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
 		defer cancel()
 
-		var text string
-		switch err := db.QueryRowContext(ctx, `select text from greetings where id = 1`).Scan(&text); {
+	type greetingRow struct{ text string }
+
+	row := db.QueryRowContext(ctx, `select text from greetings where id = 1`)
+	var text string
+	switch err := row.Scan(&text); {
 		case errors.Is(err, sql.ErrNoRows):
 			writeError(w, http.StatusNotFound, "greeting_not_found", "Greeting is not available.")
 		case err != nil:
