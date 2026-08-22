@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"log"
 	"net/http"
@@ -25,6 +26,7 @@ func main() {
 		log.Fatalf("open database: %v", err)
 	}
 	defer db.Close()
+	wrappedDB := dbQuerier{db: db}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -36,7 +38,8 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /healthz", healthz(db))
+	mux.HandleFunc("GET /healthz", healthz(wrappedDB))
+	mux.HandleFunc("GET /greeting", greeting(wrappedDB))
 
 	server := &http.Server{
 		Addr:              ":" + listenPort(),
@@ -50,18 +53,68 @@ func main() {
 	}
 }
 
-func healthz(db *sql.DB) http.HandlerFunc {
+type rowScanner interface {
+	Scan(...any) error
+}
+
+type rowQuerier interface {
+	QueryRowContext(context.Context, string, ...any) rowScanner
+}
+
+type dbQuerier struct{ db *sql.DB }
+
+func (d dbQuerier) QueryRowContext(ctx context.Context, query string, args ...any) rowScanner {
+	return d.db.QueryRowContext(ctx, query, args...)
+}
+
+func healthz(db rowQuerier) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
 		defer cancel()
-		if err := db.PingContext(ctx); err != nil {
-			http.Error(w, "service unavailable", http.StatusServiceUnavailable)
+
+		var applied int
+		if err := db.QueryRowContext(ctx, `select count(*) from schema_migrations`).Scan(&applied); err != nil || applied == 0 {
+			writeError(w, http.StatusServiceUnavailable, "service_unavailable", "Service is unavailable.")
+			return
+		}
+
+		var ok int
+		if err := db.QueryRowContext(ctx, `select 1`).Scan(&ok); err != nil {
+			writeError(w, http.StatusServiceUnavailable, "service_unavailable", "Service is unavailable.")
 			return
 		}
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte("ok\n"))
+		_, _ = w.Write([]byte("ok"))
 	}
+}
+
+
+func greeting(db rowQuerier) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
+		defer cancel()
+
+		var text string
+		switch err := db.QueryRowContext(ctx, `select text from greetings where id = 1`).Scan(&text); {
+		case errors.Is(err, sql.ErrNoRows):
+			writeError(w, http.StatusNotFound, "greeting_not_found", "Greeting is not available.")
+		case err != nil:
+			log.Printf("load greeting: %v", err)
+			writeError(w, http.StatusInternalServerError, "internal_error", "Greeting could not be loaded.")
+		case text == "":
+			writeError(w, http.StatusUnprocessableEntity, "greeting_empty", "Greeting is empty.")
+		default:
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(map[string]string{"text": text})
+		}
+	}
+}
+
+func writeError(w http.ResponseWriter, status int, code string, message string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	_ = json.NewEncoder(w).Encode(map[string]any{"error": map[string]string{"code": code, "message": message}})
 }
 
 func listenPort() string {
