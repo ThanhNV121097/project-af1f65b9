@@ -20,6 +20,7 @@
   font-size: var(--text-hero);
   font-weight: var(--weight-regular);
   line-height: var(--line-hero);
+  letter-spacing: var(--tracking-hero);
 }
 
 .message {

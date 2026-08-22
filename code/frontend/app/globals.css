@@ -20,6 +20,7 @@
   --text-hero: clamp(2.75rem, 8vw, 5rem);
   --line-base: 1.4;
   --line-hero: 1;
+  --tracking-hero: -0.04em;
   --weight-regular: 400;
   --border-width: 1px;
   --focus-width: 2px;
