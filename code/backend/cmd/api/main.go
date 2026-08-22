@@ -53,7 +53,11 @@ func main() {
 	}
 }
 
-func healthz(db *sql.DB) http.HandlerFunc {
+type rowQuerier interface {
+	QueryRowContext(context.Context, string, ...any) *sql.Row
+}
+
+func healthz(db rowQuerier) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
 		defer cancel()
