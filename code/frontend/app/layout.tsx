@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "",
-  description: "End-to-end greeting proof",
+  description: "",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
